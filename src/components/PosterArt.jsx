@@ -19,13 +19,14 @@ function paletteFor(id) {
 
 export default function PosterArt({ movie, className = "", showMeta = false }) {
   const [failed, setFailed] = useState(false);
-  const useImg = movie?.poster && !failed && !String(movie.poster).includes("placehold.co");
+  const url = (movie?.poster || "").trim();
+  const useImg = Boolean(url) && !failed;
   const [c0, c1, accent] = paletteFor(movie?.id || movie?.title);
 
   if (useImg) {
     return (
       <img
-        src={movie.poster}
+        src={url}
         alt={movie.title || ""}
         className={className + " object-cover"}
         loading="lazy"
@@ -36,11 +37,13 @@ export default function PosterArt({ movie, className = "", showMeta = false }) {
 
   return (
     <div
-      className={className + " relative flex flex-col items-center justify-center p-4 text-center overflow-hidden"}
+      className={
+        className +
+        " relative flex flex-col items-center justify-center p-4 text-center overflow-hidden"
+      }
       style={{
         background: `linear-gradient(160deg, ${c0} 0%, ${c1} 55%, ${c0} 100%)`,
       }}
-      aria-hidden={!movie?.title}
     >
       <div
         className="absolute inset-0 opacity-30"

@@ -7,7 +7,7 @@ const links = [
   { href: "#soundtracks", label: "Soundtracks" },
 ];
 
-export default function Navbar({ onWatchlist }) {
+export default function Navbar({ onWatchlist, onOpenWatchlist }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -38,14 +38,14 @@ export default function Navbar({ onWatchlist }) {
         <div className="flex items-center gap-2 ml-auto">
           <button
             type="button"
-            onClick={onWatchlist}
+            onClick={onWatchlist || onOpenWatchlist}
             className="hidden sm:inline-flex items-center gap-2 rounded-full bg-amber-400 text-[#0B0C10] text-sm font-semibold px-4 py-2 hover:bg-amber-300 transition"
           >
             My Watchlist
           </button>
           <button
             type="button"
-            onClick={onWatchlist}
+            onClick={onWatchlist || onOpenWatchlist}
             className="sm:hidden h-9 w-9 rounded-full bg-amber-400 text-[#0B0C10] flex items-center justify-center"
             aria-label="Watchlist"
           >

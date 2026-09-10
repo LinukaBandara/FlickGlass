@@ -1,6 +1,6 @@
 export default function SearchBar({ query, onQuery, genres, activeGenre, onGenre }) {
   return (
-    <div className="mx-auto max-w-6xl mb-6 sm:mb-8">
+    <div className="mx-auto max-w-6xl mb-3 sm:mb-4">
       <div className="flex flex-col gap-3">
         <label className="relative w-full">
           <span className="sr-only">Search titles</span>
@@ -21,7 +21,7 @@ export default function SearchBar({ query, onQuery, genres, activeGenre, onGenre
             value={query}
             onChange={(e) => onQuery(e.target.value)}
             placeholder="Search titles…"
-            className="w-full rounded-xl glass glass-grain pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/35 outline-none focus-visible:ring-2 focus-visible:ring-amber-400/80 relative z-10"
+            className="w-full rounded-xl glass glass-grain pl-10 pr-4 py-2 text-sm text-white placeholder:text-white/35 outline-none focus-visible:ring-2 focus-visible:ring-amber-400/80 relative z-10"
           />
         </label>
         <div className="flex flex-wrap gap-1.5 justify-center sm:justify-start">

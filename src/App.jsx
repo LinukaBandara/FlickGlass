@@ -55,8 +55,8 @@ export default function App() {
   // Carousel always stays the 7 hero titles (or search hits within hero when filtering)
   const reel = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q && genre === "All") return hero.length ? hero : movies.slice(0, 7);
-    const fromHero = hero.filter((m) => {
+    if (!q && genre === "All") return (hero && hero.length) ? hero : movies.slice(0, 7);
+    const fromHero = (hero || []).filter((m) => {
       const matchQ = !q || m.title.toLowerCase().includes(q);
       const matchG =
         genre === "All" || (m.genres || []).some((g) => g === genre);
@@ -70,7 +70,7 @@ export default function App() {
   const filteredTrending = useMemo(() => {
     // When searching, show matches from full catalog; else curated trending
     if (query.trim() || genre !== "All") return filteredCatalog;
-    return trending.length ? trending : hero.slice(0, 6);
+    return (trending && trending.length) ? trending : (hero || []).slice(0, 6);
   }, [query, genre, filteredCatalog, trending, hero]);
 
   const len = reel.length || 1;
@@ -79,20 +79,23 @@ export default function App() {
     setCurrent(0);
   }, [source, movies.length, query, genre]);
 
-  // Deep link ?movie=id
+  // Deep link ?movie=id (match against hero/reel first)
   useEffect(() => {
-    if (deepLinked.current || !movies.length) return;
+    if (deepLinked.current || !hero?.length) return;
     const param = readMovieParam();
     if (!param) return;
-    const idx = movies.findIndex((m) => String(m.id) === param);
+    let idx = hero.findIndex((m) => String(m.id) === param);
+    if (idx < 0) idx = movies.findIndex((m) => String(m.id) === param);
     if (idx >= 0) {
       deepLinked.current = true;
-      setCurrent(idx);
-      setTimeout(() => {
-        document.getElementById("trailers")?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 300);
+      // if found in full catalog only, reset filters so reel shows it via search later
+      if (!hero.some((m) => String(m.id) === param)) {
+        setQuery("");
+        setGenre("All");
+      }
+      setCurrent(Math.min(idx, Math.max(hero.length - 1, 0)));
     }
-  }, [movies]);
+  }, [hero, movies]);
 
   const stopAutoplay = useCallback(() => {
     if (timerRef.current) {
@@ -200,12 +203,12 @@ export default function App() {
       <Navbar watchlistCount={watchlist.count} onOpenWatchlist={() => setWatchlistOpen(true)} />
 
       <main>
-        <section id="home" className="relative pt-24 sm:pt-32 pb-8 px-4 sm:px-6">
-          <div className="mx-auto max-w-6xl text-center mb-8 sm:mb-10">
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+        <section id="home" className="relative pt-20 sm:pt-24 pb-16 sm:pb-20 px-4 sm:px-6 min-h-[100dvh] flex flex-col">
+          <div className="mx-auto max-w-6xl text-center mb-4 sm:mb-5">
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
               Glassy <span className="text-orange-400">Carousel</span>
             </h1>
-            <p className="mt-3 text-white/55 max-w-xl mx-auto text-sm sm:text-base">
+            <p className="mt-2 text-white/55 max-w-xl mx-auto text-xs sm:text-sm">
               Now in theaters — drag the reel, watch trailers, save to your list.{" "}
               {source === "tmdb" ? "Live from TMDB." : "Sept 2026 theatrical slate."}
             </p>
