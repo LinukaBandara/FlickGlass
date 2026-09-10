@@ -206,11 +206,11 @@ export default function App() {
         <section id="home" className="relative pt-20 sm:pt-24 pb-16 sm:pb-20 px-4 sm:px-6 min-h-[100dvh] flex flex-col">
           <div className="mx-auto max-w-6xl text-center mb-4 sm:mb-5">
             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-              Glassy <span className="text-orange-400">Carousel</span>
+              Now <span className="text-amber-400">Playing</span>
             </h1>
             <p className="mt-2 text-white/55 max-w-xl mx-auto text-xs sm:text-sm">
-              Now in theaters — drag the reel, watch trailers, save to your list.{" "}
-              {source === "tmdb" ? "Live from TMDB." : "Sept 2026 theatrical slate."}
+              Drag the reel, watch official trailers, save to your list.{" "}
+              {source === "tmdb" ? "Live theatrical slate via TMDB." : "Curated theatrical slate."}
             </p>
             {error ? <p className="mt-2 text-sm text-amber-400/90">{error}</p> : null}
           </div>

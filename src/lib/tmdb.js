@@ -44,13 +44,24 @@ function genresFromIds(ids, map) {
 async function trailerFor(movieId) {
   try {
     const data = await tmdb(`/movie/${movieId}/videos`);
-    const yt = (data.results || []).find(
-      (v) =>
-        v.site === "YouTube" &&
-        (v.type === "Trailer" || v.type === "Teaser") &&
-        v.key
+    const list = (data.results || []).filter(
+      (v) => v.site === "YouTube" && v.key
     );
-    return yt?.key || "";
+    // Prefer official trailers, then any trailer, then teaser
+    const score = (v) => {
+      let s = 0;
+      const name = (v.name || "").toLowerCase();
+      if (v.type === "Trailer") s += 50;
+      if (v.type === "Teaser") s += 10;
+      if (name.includes("official trailer")) s += 40;
+      else if (name.includes("official")) s += 20;
+      else if (name.includes("trailer")) s += 15;
+      if (v.official) s += 25;
+      if (v.size >= 1080) s += 5;
+      return s;
+    };
+    list.sort((a, b) => score(b) - score(a));
+    return list[0]?.key || "";
   } catch {
     return "";
   }
