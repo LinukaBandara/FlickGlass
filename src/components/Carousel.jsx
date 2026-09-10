@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import PosterArt from "./PosterArt";
 
 const DRAG_THRESHOLD = 48;
 
@@ -40,7 +41,7 @@ export default function Carousel({ movies, current, onSelect, onWatch, onInterac
 
   return (
     <div
-      className="carousel-stage relative w-full max-w-6xl mx-auto h-[480px] sm:h-[540px] md:h-[580px] select-none pb-8"
+      className="carousel-stage relative w-full max-w-6xl mx-auto h-[500px] sm:h-[560px] md:h-[600px] select-none"
       style={{ touchAction: "pan-y", cursor: dragging ? "grabbing" : "grab" }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -48,15 +49,14 @@ export default function Carousel({ movies, current, onSelect, onWatch, onInterac
       onPointerCancel={onPointerUp}
       onMouseEnter={onInteract}
     >
-      {/* Ambient glow behind active card */}
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full opacity-50 blur-[80px]"
+        className="pointer-events-none absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] rounded-full opacity-50 blur-[80px]"
         style={{
-          background: "radial-gradient(circle, rgba(168,85,247,0.45) 0%, rgba(99,102,241,0.2) 45%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(99,102,241,0.18) 45%, transparent 70%)",
         }}
       />
 
-      <div className="carousel-track relative w-full h-full flex items-center justify-center">
+      <div className="carousel-track relative w-full h-[420px] sm:h-[460px] flex items-center justify-center">
         {movies.map((m, i) => {
           const offset = i - current;
           const abs = Math.abs(offset);
@@ -67,8 +67,8 @@ export default function Carousel({ movies, current, onSelect, onWatch, onInterac
           const translateX = offset * 175 + dragBoost;
           const translateZ = -abs * 130;
           const scale = Math.max(0.72, 1 - abs * 0.14);
-          const opacity = Math.max(0.4, 1 - abs * 0.22);
-          const blur = abs === 0 ? 0 : 1 + abs * 0.8;
+          const opacity = Math.max(0.45, 1 - abs * 0.2);
+          const blur = abs === 0 ? 0 : 1 + abs * 0.7;
           const z = 40 - abs;
           const active = i === current;
 
@@ -77,7 +77,7 @@ export default function Carousel({ movies, current, onSelect, onWatch, onInterac
               key={m.id}
               className="carousel-card absolute"
               style={{
-                width: active ? "min(260px, 72vw)" : "min(220px, 60vw)",
+                width: active ? "min(250px, 68vw)" : "min(210px, 56vw)",
                 transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
                 opacity,
                 zIndex: z,
@@ -95,7 +95,6 @@ export default function Carousel({ movies, current, onSelect, onWatch, onInterac
                 else onSelect(i);
               }}
             >
-              {/* Glass frame */}
               <div
                 className={
                   "relative rounded-[1.35rem] p-[3px] " +
@@ -105,18 +104,9 @@ export default function Carousel({ movies, current, onSelect, onWatch, onInterac
                 }
               >
                 <div className="relative rounded-[1.2rem] overflow-hidden bg-[#12141a] aspect-[2/3]">
-                  <img
-                    src={m.poster}
-                    alt={m.title}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
+                  <PosterArt movie={m} className="h-full w-full" showMeta={!active} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 pointer-events-none" />
 
-                  {/* Center play overlay — matches demo */}
                   {active && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
                       <button
@@ -140,7 +130,7 @@ export default function Carousel({ movies, current, onSelect, onWatch, onInterac
                           onWatch(m);
                         }}
                         disabled={!m.trailerId}
-                        className="px-4 py-1.5 rounded-full text-xs font-semibold bg-black/40 backdrop-blur-md border border-white/25 text-white hover:bg-black/55 transition disabled:opacity-40"
+                        className="px-4 py-1.5 rounded-full text-xs font-semibold bg-black/45 backdrop-blur-md border border-white/25 text-white hover:bg-black/60 transition disabled:opacity-40"
                       >
                         ▶ Watch Trailer
                       </button>
@@ -149,13 +139,7 @@ export default function Carousel({ movies, current, onSelect, onWatch, onInterac
                 </div>
               </div>
 
-              {/* Meta under card — demo style */}
-              <div
-                className={
-                  "mt-3 text-center px-1 transition-opacity " +
-                  (active ? "opacity-100" : "opacity-50")
-                }
-              >
+              <div className={"mt-3 text-center px-1 " + (active ? "opacity-100" : "opacity-60")}>
                 <h2 className={"font-bold leading-tight " + (active ? "text-base sm:text-lg" : "text-sm")}>
                   {m.title}
                 </h2>
@@ -170,7 +154,7 @@ export default function Carousel({ movies, current, onSelect, onWatch, onInterac
         })}
       </div>
 
-      <div className="absolute bottom-0 inset-x-0 flex justify-center gap-2">
+      <div className="absolute bottom-2 inset-x-0 flex justify-center gap-2 z-20">
         {movies.map((m, i) => (
           <button
             key={m.id}

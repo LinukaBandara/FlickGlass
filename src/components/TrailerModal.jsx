@@ -1,7 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function TrailerModal({ movie, onClose }) {
+  const [failed, setFailed] = useState(false);
+
   useEffect(() => {
+    setFailed(false);
     const onKey = (e) => {
       if (e.key === "Escape") onClose();
     };
@@ -11,9 +14,14 @@ export default function TrailerModal({ movie, onClose }) {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [onClose]);
+  }, [onClose, movie?.trailerId]);
 
   if (!movie) return null;
+
+  const id = movie.trailerId;
+  const src = id
+    ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`
+    : null;
 
   return (
     <div
@@ -46,13 +54,31 @@ export default function TrailerModal({ movie, onClose }) {
         </div>
 
         <div className="relative w-full aspect-video bg-black">
-          <iframe
-            title={movie.title + " trailer"}
-            className="absolute inset-0 h-full w-full"
-            src={"https://www.youtube.com/embed/" + movie.trailerId + "?autoplay=1&rel=0&modestbranding=1"}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          {src && !failed ? (
+            <iframe
+              title={movie.title + " trailer"}
+              className="absolute inset-0 h-full w-full"
+              src={src}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+              onError={() => setFailed(true)}
+            />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
+              <p className="text-white/70 text-sm">Trailer embed unavailable in this browser.</p>
+              {id ? (
+                <a
+                  href={`https://www.youtube.com/watch?v=${id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-red-600 hover:bg-red-500 text-white text-sm font-semibold px-5 py-2.5 transition"
+                >
+                  Watch on YouTube
+                </a>
+              ) : null}
+            </div>
+          )}
         </div>
 
         <div className="px-4 sm:px-5 py-4 flex items-end justify-between gap-4">

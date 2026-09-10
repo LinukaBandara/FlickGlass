@@ -23,7 +23,7 @@ function readMovieParam() {
 }
 
 export default function App() {
-  const { movies, trending, source, loading, error } = useMovies();
+  const { movies, hero, trending, source, loading, error } = useMovies();
   const watchlist = useWatchlist();
   const [current, setCurrent] = useState(0);
   const [modalMovie, setModalMovie] = useState(null);
@@ -39,11 +39,10 @@ export default function App() {
   const genreOptions = useMemo(() => {
     const set = new Set();
     movies.forEach((m) => (m.genres || []).forEach((g) => set.add(g)));
-    trending.forEach((m) => (m.genres || []).forEach((g) => set.add(g)));
-    return Array.from(set).sort().slice(0, 8);
-  }, [movies, trending]);
+    return Array.from(set).sort().slice(0, 12);
+  }, [movies]);
 
-  const filteredMovies = useMemo(() => {
+  const filteredCatalog = useMemo(() => {
     const q = query.trim().toLowerCase();
     return movies.filter((m) => {
       const matchQ = !q || m.title.toLowerCase().includes(q);
@@ -53,17 +52,27 @@ export default function App() {
     });
   }, [movies, query, genre]);
 
-  const filteredTrending = useMemo(() => {
+  // Carousel always stays the 7 hero titles (or search hits within hero when filtering)
+  const reel = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return trending.filter((m) => {
+    if (!q && genre === "All") return hero.length ? hero : movies.slice(0, 7);
+    const fromHero = hero.filter((m) => {
       const matchQ = !q || m.title.toLowerCase().includes(q);
       const matchG =
         genre === "All" || (m.genres || []).some((g) => g === genre);
       return matchQ && matchG;
     });
-  }, [trending, query, genre]);
+    if (fromHero.length) return fromHero;
+    // If search only hits catalog titles, show those in carousel too
+    return filteredCatalog.slice(0, 7);
+  }, [hero, movies, query, genre, filteredCatalog]);
 
-  const reel = filteredMovies.length ? filteredMovies : movies;
+  const filteredTrending = useMemo(() => {
+    // When searching, show matches from full catalog; else curated trending
+    if (query.trim() || genre !== "All") return filteredCatalog;
+    return trending.length ? trending : hero.slice(0, 6);
+  }, [query, genre, filteredCatalog, trending, hero]);
+
   const len = reel.length || 1;
 
   useEffect(() => {
@@ -191,7 +200,7 @@ export default function App() {
       <Navbar watchlistCount={watchlist.count} onOpenWatchlist={() => setWatchlistOpen(true)} />
 
       <main>
-        <section id="home" className="relative pt-24 sm:pt-32 pb-24 sm:pb-28 px-4 sm:px-6">
+        <section id="home" className="relative pt-24 sm:pt-32 pb-8 px-4 sm:px-6">
           <div className="mx-auto max-w-6xl text-center mb-8 sm:mb-10">
             <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
               Glassy <span className="text-orange-400">Carousel</span>

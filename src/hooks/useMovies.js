@@ -1,57 +1,61 @@
 import { useEffect, useState } from "react";
-import { movies as fallbackMovies, trending as fallbackTrending } from "../data/movies";
-import { fetchNowPlaying, fetchPopular, hasTmdbKey } from "../lib/tmdb";
+import { movies as fallbackMovies, heroMovies as fallbackHero, trending as fallbackTrending } from "../data/movies";
+import { fetchNowPlaying, mapMovie } from "../lib/tmdb";
 
 export function useMovies() {
   const [movies, setMovies] = useState(fallbackMovies);
+  const [hero, setHero] = useState(fallbackHero);
   const [trending, setTrending] = useState(fallbackTrending);
   const [source, setSource] = useState("fallback");
-  const [loading, setLoading] = useState(hasTmdbKey());
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!hasTmdbKey()) {
-      setLoading(false);
-      setSource("fallback");
-      setMovies(fallbackMovies);
-      setTrending(fallbackTrending);
-      return;
-    }
-
     let cancelled = false;
-    (async () => {
+    async function load() {
+      setLoading(true);
+      setError(null);
+      const key = import.meta.env.VITE_TMDB_API_KEY;
+      if (!key) {
+        setMovies(fallbackMovies);
+        setHero(fallbackHero);
+        setTrending(fallbackTrending);
+        setSource("fallback");
+        setLoading(false);
+        return;
+      }
       try {
-        setLoading(true);
-        const [now, popular] = await Promise.all([
-          fetchNowPlaying(8),
-          fetchPopular(6),
-        ]);
+        const data = await fetchNowPlaying(key);
         if (cancelled) return;
-        if (now.length) {
-          setMovies(now);
+        const mapped = (data.results || []).slice(0, 24).map(mapMovie).filter((m) => m.poster);
+        if (mapped.length >= 5) {
+          setMovies(mapped);
+          setHero(mapped.slice(0, 7));
+          setTrending(mapped.slice(0, 6));
           setSource("tmdb");
         } else {
           setMovies(fallbackMovies);
+          setHero(fallbackHero);
+          setTrending(fallbackTrending);
           setSource("fallback");
-          setError("TMDB returned no titles — using curated slate.");
         }
-        if (popular.length) setTrending(popular);
-        setError(null);
       } catch (e) {
-        if (cancelled) return;
-        setMovies(fallbackMovies);
-        setTrending(fallbackTrending);
-        setSource("fallback");
-        setError(e.message || "TMDB failed — using curated slate.");
+        if (!cancelled) {
+          setError(e?.message || "TMDB failed");
+          setMovies(fallbackMovies);
+          setHero(fallbackHero);
+          setTrending(fallbackTrending);
+          setSource("fallback");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
-    })();
-
+    }
+    load();
     return () => {
       cancelled = true;
     };
   }, []);
 
-  return { movies, trending, source, loading, error };
+  return { movies, hero, trending, source, loading, error };
 }

@@ -1,7 +1,9 @@
+import PosterArt from "./PosterArt";
+
 export default function Soundtracks({ movies, onSelect }) {
   const list = (movies || []).slice(0, 8);
   return (
-    <section id="soundtracks" className="relative px-4 sm:px-6 pb-28 sm:pb-32 pt-4">
+    <section id="soundtracks" className="relative px-4 sm:px-6 pb-32 pt-4">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6">
           <p className="text-[11px] uppercase tracking-[0.18em] text-amber-400/90 mb-2">Scores</p>
@@ -11,18 +13,16 @@ export default function Soundtracks({ movies, onSelect }) {
           </p>
         </div>
         <div className="grid sm:grid-cols-2 gap-2">
-          {list.map((m, i) => (
+          {list.map((m) => (
             <button
               key={m.id}
               type="button"
-              onClick={() => onSelect?.(m, i)}
-              className="glass glass-grain rounded-xl p-3 flex items-center gap-3 text-left hover:bg-white/5 transition focus-visible:ring-2 focus-visible:ring-amber-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0C10] relative"
+              onClick={() => onSelect?.(m)}
+              className="glass glass-grain rounded-xl p-3 flex items-center gap-3 text-left hover:bg-white/5 transition focus-visible:ring-2 focus-visible:ring-amber-400/80 relative"
             >
-              {m.poster ? (
-                <img src={m.poster} alt="" className="h-12 w-12 rounded-lg object-cover shrink-0 relative z-10" />
-              ) : (
-                <div className="h-12 w-12 rounded-lg bg-white/10 shrink-0" />
-              )}
+              <div className="h-12 w-12 rounded-lg overflow-hidden shrink-0 relative z-10">
+                <PosterArt movie={m} className="h-full w-full" />
+              </div>
               <div className="min-w-0 relative z-10">
                 <p className="text-sm font-medium truncate">{m.soundtrack || m.title}</p>
                 <p className="text-xs text-white/50 truncate">
