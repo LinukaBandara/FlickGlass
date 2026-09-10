@@ -39,7 +39,7 @@ export default function App() {
   const genreOptions = useMemo(() => {
     const set = new Set();
     movies.forEach((m) => (m.genres || []).forEach((g) => set.add(g)));
-    return Array.from(set).sort().slice(0, 12);
+    return Array.from(set).sort().slice(0, 6);
   }, [movies]);
 
   const filteredCatalog = useMemo(() => {
@@ -251,11 +251,12 @@ export default function App() {
       {active ? (
         <MediaDock
           movie={active}
-          playing={playing}
-          onToggle={() => {
-            setPlaying((p) => !p);
+          playing={autoplay}
+          onToggleAutoplay={() => {
             setAutoplay((a) => !a);
+            setPlaying((p) => !p);
           }}
+          onPlayTrailer={openTrailer}
           onPrev={() => goTo(current - 1)}
           onNext={() => goTo(current + 1)}
         />

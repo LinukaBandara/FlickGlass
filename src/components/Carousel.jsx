@@ -113,7 +113,7 @@ export default function Carousel({ movies, current, onSelect, onWatch, onInterac
                   <PosterArt movie={m} className="h-full w-full" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10 pointer-events-none" />
                   {active && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -121,23 +121,12 @@ export default function Carousel({ movies, current, onSelect, onWatch, onInterac
                           onWatch(m);
                         }}
                         disabled={!m.trailerId}
-                        className="h-14 w-14 rounded-full bg-white/20 backdrop-blur-xl border border-white/40 flex items-center justify-center hover:bg-white/30 hover:scale-105 transition disabled:opacity-40"
+                        className="h-14 w-14 rounded-full bg-white/20 backdrop-blur-xl border border-white/40 flex items-center justify-center hover:bg-white/30 hover:scale-105 transition disabled:opacity-40 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
                         aria-label="Watch trailer"
                       >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="white" className="ml-0.5">
                           <path d="M8 5v14l11-7z" />
                         </svg>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onWatch(m);
-                        }}
-                        disabled={!m.trailerId}
-                        className="px-3 py-1 rounded-full text-[11px] font-semibold bg-black/50 backdrop-blur-md border border-white/25 text-white hover:bg-black/65 transition disabled:opacity-40"
-                      >
-                        ▶ Watch Trailer
                       </button>
                     </div>
                   )}
