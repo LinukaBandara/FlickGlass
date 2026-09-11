@@ -17,7 +17,8 @@ export function useMovies() {
       setLoading(true);
       setError(null);
       try {
-        const mapped = await fetchNowPlaying(24);
+        // Keep the live request small: now-playing data plus a limited trailer lookup set.
+        const mapped = await fetchNowPlaying(8);
         if (cancelled) return;
         if (mapped.length >= 5) {
           setMovies(mapped);
