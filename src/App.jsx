@@ -185,8 +185,8 @@ function HomePage() {
         <Soundtracks movies={movies} onSelect={jumpToMovie} />
       </main>
 
-      {active ? <MediaDock movie={active} playing={autoplay} onToggleAutoplay={() => { setAutoplay((a) => !a); setPlaying((p) => !p); }} onPlayTrailer={openTrailer} onPrev={() => goTo(current - 1)} onNext={() => goTo(current + 1)} /> : null}
-      {modalMovie ? <TrailerModal movie={modalMovie} onClose={() => setModalMovie(null)} /> : null}
+      {active ? <MediaDock movie={active} playing={playing} onToggleAutoplay={() => { setAutoplay((a) => !a); setPlaying((p) => !p); }} onPlayTrailer={openTrailer} onPrev={() => goTo(current - 1)} onNext={() => goTo(current + 1)} /> : null}
+      {modalMovie ? <TrailerModal movie={modalMovie} onClose={() => { setModalMovie(null); setPlaying(autoplay); }} /> : null}
       <WatchlistPanel open={watchlistOpen} items={watchlist.items} onClose={() => setWatchlistOpen(false)} onRemove={watchlist.remove} onPlay={(m) => { setWatchlistOpen(false); openTrailer(m); }} />
 
       <footer className="border-t border-white/10 px-4 py-8 text-center text-sm text-white/65 pb-24">
