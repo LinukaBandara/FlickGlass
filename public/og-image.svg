@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">FlickGlass — Cinematic Trailer Hub</title>
+  <desc id="desc">A cinematic movie discovery hub for trailers, soundtracks, and watchlists.</desc>
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="#3b2f00"/><stop offset="1" stop-color="#0B0C10"/></radialGradient>
+    <linearGradient id="gold" x1="0" x2="1"><stop stop-color="#F5C518"/><stop offset="1" stop-color="#ffe78a"/></linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0B0C10"/>
+  <rect width="1200" height="630" fill="url(#glow)" opacity=".9"/>
+  <circle cx="180" cy="120" r="180" fill="#6366f1" opacity=".12"/>
+  <circle cx="1050" cy="500" r="220" fill="#a855f7" opacity=".10"/>
+  <rect x="72" y="72" width="1056" height="486" rx="36" fill="#ffffff" fill-opacity=".045" stroke="#ffffff" stroke-opacity=".14"/>
+  <text x="110" y="265" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="82" font-weight="800">FLICK<tspan fill="url(#gold)">GLASS</tspan></text>
+  <text x="114" y="330" fill="#ffffff" fill-opacity=".78" font-family="Inter, Arial, sans-serif" font-size="30">Cinematic trailer discovery, soundtracks &amp; watchlists.</text>
+  <rect x="114" y="382" width="220" height="8" rx="4" fill="#F5C518"/>
+  <text x="114" y="445" fill="#ffffff" fill-opacity=".55" font-family="Inter, Arial, sans-serif" font-size="20">Watch. Discover. Save.</text>
+</svg>
