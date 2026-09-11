@@ -1,21 +1,17 @@
-const API = "https://api.themoviedb.org/3";
+const API = "/api/tmdb";
 const IMG = "https://image.tmdb.org/t/p/w500";
 
-export function hasTmdbKey() {
-  return Boolean(import.meta.env.VITE_TMDB_API_KEY);
-}
-
-function key() {
-  return import.meta.env.VITE_TMDB_API_KEY;
-}
-
 async function tmdb(path, params = {}) {
-  const url = new URL(`${API}${path}`);
-  url.searchParams.set("api_key", key());
+  const url = new URL(API, window.location.origin);
+  url.searchParams.set("path", path);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, String(v)));
-  const res = await fetch(url);
+  const res = await fetch(url, { headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error(`TMDB ${res.status}`);
   return res.json();
+}
+
+export function hasTmdbKey() {
+  return true;
 }
 
 let genreMapCache = null;
@@ -47,7 +43,6 @@ async function trailerFor(movieId) {
     const list = (data.results || []).filter(
       (v) => v.site === "YouTube" && v.key
     );
-    // Prefer official trailers, then any trailer, then teaser
     const score = (v) => {
       let s = 0;
       const name = (v.name || "").toLowerCase();

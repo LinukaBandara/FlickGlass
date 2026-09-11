@@ -10,6 +10,9 @@ import WatchlistPanel from "./components/WatchlistPanel";
 import SearchBar from "./components/SearchBar";
 import SkeletonReel from "./components/SkeletonReel";
 import Soundtracks from "./components/Soundtracks";
+import CookieConsent from "./components/CookieConsent";
+import LegalPage from "./pages/LegalPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const AUTOPLAY_MS = 4500;
 
@@ -22,7 +25,7 @@ function readMovieParam() {
   }
 }
 
-export default function App() {
+function HomePage() {
   const { movies, hero, trending, source, loading, error } = useMovies();
   const watchlist = useWatchlist();
   const [current, setCurrent] = useState(0);
@@ -43,43 +46,34 @@ export default function App() {
   }, [movies]);
 
   const filteredCatalog = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim().toLowerCase().slice(0, 100);
     return movies.filter((m) => {
       const matchQ = !q || m.title.toLowerCase().includes(q);
-      const matchG =
-        genre === "All" || (m.genres || []).some((g) => g === genre);
+      const matchG = genre === "All" || (m.genres || []).some((g) => g === genre);
       return matchQ && matchG;
     });
   }, [movies, query, genre]);
 
-  // Carousel always stays the 7 hero titles (or search hits within hero when filtering)
   const reel = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q && genre === "All") return (hero && hero.length) ? hero : movies.slice(0, 7);
+    const q = query.trim().toLowerCase().slice(0, 100);
+    if (!q && genre === "All") return hero?.length ? hero : movies.slice(0, 7);
     const fromHero = (hero || []).filter((m) => {
       const matchQ = !q || m.title.toLowerCase().includes(q);
-      const matchG =
-        genre === "All" || (m.genres || []).some((g) => g === genre);
+      const matchG = genre === "All" || (m.genres || []).some((g) => g === genre);
       return matchQ && matchG;
     });
-    if (fromHero.length) return fromHero;
-    // If search only hits catalog titles, show those in carousel too
-    return filteredCatalog.slice(0, 7);
+    return fromHero.length ? fromHero : filteredCatalog.slice(0, 7);
   }, [hero, movies, query, genre, filteredCatalog]);
 
   const filteredTrending = useMemo(() => {
-    // When searching, show matches from full catalog; else curated trending
     if (query.trim() || genre !== "All") return filteredCatalog;
-    return (trending && trending.length) ? trending : (hero || []).slice(0, 6);
+    return trending?.length ? trending : (hero || []).slice(0, 6);
   }, [query, genre, filteredCatalog, trending, hero]);
 
   const len = reel.length || 1;
 
-  useEffect(() => {
-    setCurrent(0);
-  }, [source, movies.length, query, genre]);
+  useEffect(() => setCurrent(0), [source, movies.length, query, genre]);
 
-  // Deep link ?movie=id (match against hero/reel first)
   useEffect(() => {
     if (deepLinked.current || !hero?.length) return;
     const param = readMovieParam();
@@ -88,11 +82,8 @@ export default function App() {
     if (idx < 0) idx = movies.findIndex((m) => String(m.id) === param);
     if (idx >= 0) {
       deepLinked.current = true;
-      // if found in full catalog only, reset filters so reel shows it via search later
-      if (!hero.some((m) => String(m.id) === param)) {
-        setQuery("");
-        setGenre("All");
-      }
+      setQuery("");
+      setGenre("All");
       setCurrent(Math.min(idx, Math.max(hero.length - 1, 0)));
     }
   }, [hero, movies]);
@@ -107,9 +98,7 @@ export default function App() {
   const startAutoplay = useCallback(() => {
     stopAutoplay();
     if (!autoplay || modalMovie || pausedRef.current || reel.length < 2) return;
-    timerRef.current = setInterval(() => {
-      setCurrent((c) => (c + 1) % reel.length);
-    }, AUTOPLAY_MS);
+    timerRef.current = setInterval(() => setCurrent((c) => (c + 1) % reel.length), AUTOPLAY_MS);
   }, [autoplay, modalMovie, reel.length, stopAutoplay]);
 
   useEffect(() => {
@@ -127,56 +116,30 @@ export default function App() {
     }, AUTOPLAY_MS + 600);
   }, [autoplay, modalMovie, startAutoplay, stopAutoplay]);
 
-  const goTo = useCallback(
-    (i) => {
-      pauseTemporarily();
-      const next = ((i % len) + len) % len;
-      setCurrent(next);
-      const m = reel[next];
-      if (m && window.history?.replaceState) {
-        const url = new URL(window.location.href);
-        url.searchParams.set("movie", String(m.id));
-        window.history.replaceState({}, "", url);
-      }
-    },
-    [len, pauseTemporarily, reel]
-  );
+  const goTo = useCallback((i) => {
+    pauseTemporarily();
+    const next = ((i % len) + len) % len;
+    setCurrent(next);
+    const m = reel[next];
+    if (m && window.history?.replaceState) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("movie", String(m.id));
+      window.history.replaceState({}, "", url);
+    }
+  }, [len, pauseTemporarily, reel]);
 
-  const openTrailer = useCallback(
-    (movie) => {
-      if (!movie?.trailerId) return;
-      pauseTemporarily();
-      setModalMovie(movie);
-      setPlaying(false);
-    },
-    [pauseTemporarily]
-  );
+  const openTrailer = useCallback((movie) => {
+    if (!movie?.trailerId) return;
+    pauseTemporarily();
+    setModalMovie(movie);
+    setPlaying(false);
+  }, [pauseTemporarily]);
 
-  const jumpToMovie = useCallback(
-    (movie) => {
-      const idx = reel.findIndex((m) => m.id === movie.id);
-      if (idx >= 0) {
-        goTo(idx);
-      } else {
-        const allIdx = movies.findIndex((m) => m.id === movie.id);
-        if (allIdx >= 0) {
-          setQuery("");
-          setGenre("All");
-          setTimeout(() => {
-            const i = movies.findIndex((m) => m.id === movie.id);
-            if (i >= 0) {
-              setCurrent(i);
-              const url = new URL(window.location.href);
-              url.searchParams.set("movie", String(movie.id));
-              window.history.replaceState({}, "", url);
-            }
-          }, 0);
-        }
-      }
-      document.getElementById("trailers")?.scrollIntoView({ behavior: "smooth", block: "center" });
-    },
-    [reel, movies, goTo]
-  );
+  const jumpToMovie = useCallback((movie) => {
+    const idx = reel.findIndex((m) => m.id === movie.id);
+    if (idx >= 0) goTo(idx);
+    document.getElementById("trailers")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [reel, goTo]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -205,87 +168,44 @@ export default function App() {
       <main>
         <section id="home" className="relative pt-20 sm:pt-24 pb-20 sm:pb-24 px-4 sm:px-6 min-h-0 sm:min-h-[100dvh] flex flex-col">
           <div className="mx-auto max-w-6xl text-center mb-4 sm:mb-5">
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-              Now <span className="text-amber-400">Playing</span>
-            </h1>
-            <p className="mt-2 text-white/55 max-w-xl mx-auto text-xs sm:text-sm">
-              Drag the reel, watch official trailers, save to your list.{" "}
-              {source === "tmdb" ? "Live theatrical slate via TMDB." : "Curated theatrical slate."}
-            </p>
-            {error ? <p className="mt-2 text-sm text-amber-400/90">{error}</p> : null}
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">Now <span className="text-amber-400">Playing</span></h1>
+            <p className="mt-2 text-white/70 max-w-xl mx-auto text-xs sm:text-sm">Drag the reel, watch official trailers, save to your list. {source === "tmdb" ? "Live theatrical slate via TMDB." : "Curated theatrical slate."}</p>
+            {error ? <p className="mt-2 text-sm text-amber-300">{error}</p> : null}
+            <a href="#trailers" className="mt-4 inline-flex rounded-xl bg-amber-400 px-5 py-2.5 text-sm font-semibold text-[#0B0C10] hover:bg-amber-300">Explore trailers</a>
           </div>
 
-          <SearchBar
-            query={query}
-            onQuery={setQuery}
-            genres={genreOptions}
-            activeGenre={genre}
-            onGenre={setGenre}
-          />
+          <SearchBar query={query} onQuery={setQuery} genres={genreOptions} activeGenre={genre} onGenre={setGenre} />
 
           <div id="trailers">
-            {loading && movies.length === 0 ? (
-              <SkeletonReel />
-            ) : reel.length === 0 ? (
-              <p className="text-center text-white/50 py-20 text-sm">No titles match this search.</p>
-            ) : (
-              <Carousel
-                movies={reel}
-                current={Math.min(current, reel.length - 1)}
-                onSelect={goTo}
-                onWatch={openTrailer}
-                onInteract={pauseTemporarily}
-              />
-            )}
+            {loading && movies.length === 0 ? <SkeletonReel /> : reel.length === 0 ? <p className="text-center text-white/70 py-20 text-sm">No titles match this search.</p> : <Carousel movies={reel} current={Math.min(current, reel.length - 1)} onSelect={goTo} onWatch={openTrailer} onInteract={pauseTemporarily} />}
           </div>
         </section>
 
         <TrendingGrid items={filteredTrending} savedIds={savedIds} onToggle={watchlist.toggle} />
-
-        <Soundtracks
-          movies={movies}
-          onSelect={(m) => jumpToMovie(m)}
-        />
+        <Soundtracks movies={movies} onSelect={jumpToMovie} />
       </main>
 
-      {active ? (
-        <MediaDock
-          movie={active}
-          playing={autoplay}
-          onToggleAutoplay={() => {
-            setAutoplay((a) => !a);
-            setPlaying((p) => !p);
-          }}
-          onPlayTrailer={openTrailer}
-          onPrev={() => goTo(current - 1)}
-          onNext={() => goTo(current + 1)}
-        />
-      ) : null}
+      {active ? <MediaDock movie={active} playing={playing} onToggleAutoplay={() => { setAutoplay((a) => !a); setPlaying((p) => !p); }} onPlayTrailer={openTrailer} onPrev={() => goTo(current - 1)} onNext={() => goTo(current + 1)} /> : null}
+      {modalMovie ? <TrailerModal movie={modalMovie} onClose={() => { setModalMovie(null); setPlaying(autoplay); }} /> : null}
+      <WatchlistPanel open={watchlistOpen} items={watchlist.items} onClose={() => setWatchlistOpen(false)} onRemove={watchlist.remove} onPlay={(m) => { setWatchlistOpen(false); openTrailer(m); }} />
 
-      {modalMovie ? <TrailerModal movie={modalMovie} onClose={() => setModalMovie(null)} /> : null}
-
-      <WatchlistPanel
-        open={watchlistOpen}
-        items={watchlist.items}
-        onClose={() => setWatchlistOpen(false)}
-        onRemove={watchlist.remove}
-        onPlay={(m) => {
-          setWatchlistOpen(false);
-          openTrailer(m);
-        }}
-      />
-
-      <footer className="border-t border-white/10 px-4 py-8 text-center text-sm text-white/40 pb-24">
-        <p>
-          <span className="font-semibold text-white/70">FlickGlass</span> — cinematic trailer hub.
-        </p>
-        <p className="mt-1">
-          Data: {source === "tmdb" ? "TMDB live" : "Curated fallback"} · Built by{" "}
-          <a href="https://ark-ii.studio" target="_blank" rel="noopener noreferrer" className="text-amber-400/90 hover:text-amber-300">
-            ARK II
-          </a>
-        </p>
+      <footer className="border-t border-white/10 px-4 py-8 text-center text-sm text-white/65 pb-24">
+        <p><span className="font-semibold text-white/85">FlickGlass</span> — cinematic trailer hub.</p>
+        <p className="mt-1">Data: {source === "tmdb" ? "TMDB live" : "Curated fallback"} · Built by <a href="https://ark-ii.studio" target="_blank" rel="noopener noreferrer" className="text-amber-300 hover:text-amber-200">ARK II</a></p>
+        <nav className="mt-4 flex justify-center gap-4 text-xs" aria-label="Legal links">
+          <a href="/privacy" className="text-white/70 hover:text-white underline-offset-2 hover:underline">Privacy Policy</a>
+          <a href="/terms" className="text-white/70 hover:text-white underline-offset-2 hover:underline">Terms & Conditions</a>
+        </nav>
       </footer>
+      <CookieConsent />
     </div>
   );
+}
+
+export default function App() {
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (path === "/privacy") return <LegalPage type="privacy" />;
+  if (path === "/terms") return <LegalPage type="terms" />;
+  if (path !== "/") return <NotFoundPage />;
+  return <HomePage />;
 }

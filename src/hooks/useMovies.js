@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  movies as fallbackMovies,
-  heroMovies as fallbackHero,
-  trending as fallbackTrending,
-} from "../data/movies";
+import { movies as fallbackMovies, heroMovies as fallbackHero, trending as fallbackTrending } from "../data/movies";
 import { fetchNowPlaying } from "../lib/tmdb";
 
 export function useMovies() {
@@ -20,19 +16,7 @@ export function useMovies() {
     async function load() {
       setLoading(true);
       setError(null);
-      const key = import.meta.env.VITE_TMDB_API_KEY;
-      if (!key) {
-        if (!cancelled) {
-          setMovies(fallbackMovies);
-          setHero(fallbackHero);
-          setTrending(fallbackTrending);
-          setSource("fallback");
-          setLoading(false);
-        }
-        return;
-      }
       try {
-        // returns already-mapped movies with posters + trailers
         const mapped = await fetchNowPlaying(24);
         if (cancelled) return;
         if (mapped.length >= 5) {
@@ -60,9 +44,7 @@ export function useMovies() {
     }
 
     load();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   return { movies, hero, trending, source, loading, error };

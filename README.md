@@ -1,20 +1,19 @@
 # FlickGlass
 
-Cinematic trailer hub — glassmorphism + optional TMDB live slate.
+Cinematic trailer hub — glassmorphism + TMDB live slate.
 
 ## Features
 
 - 3D coverflow with live drag + autoplay
 - Trailer modal (YouTube)
 - Search + genre filter
-- Real TMDB genre chips (with API key)
+- Server-side TMDB proxy (API key never shipped to the browser)
 - Persistent watchlist (`localStorage`)
-- Deep link `?movie=<id>`
-- Soundtracks section
-- Mobile nav drawer
-- Skeleton loaders
-- Glass specular + grain
-- Keyboard focus rings + reduced motion
+- Deep links `?movie=<id>`
+- Privacy policy + terms
+- Cookie consent with opt-in analytics
+- SEO metadata, social preview, sitemap and robots.txt
+- Mobile navigation, skeleton loaders, reduced-motion support and keyboard focus rings
 
 ## Run
 
@@ -23,19 +22,22 @@ npm install
 npm run dev
 ```
 
-### Optional TMDB
+### TMDB configuration
+
+Create a local `.env` from `.env.example`:
 
 ```bash
-# .env
-VITE_TMDB_API_KEY=your_key
+TMDB_API_KEY=your_key
 ```
 
-## Deploy (Vercel)
+Do **not** use `VITE_TMDB_API_KEY`. Vite exposes `VITE_*` variables to browser code. The TMDB key is consumed only by the Vercel server function at `/api/tmdb`.
 
-```bash
-vercel
-```
+For Vercel, add `TMDB_API_KEY` as a server-side Environment Variable and redeploy.
 
-Set `VITE_TMDB_API_KEY` in project env, redeploy.
+## Security notes
+
+- `.env` files are ignored and the previously committed `.env` was removed from the working branch.
+- The TMDB proxy allowlists endpoints, validates same-origin requests, applies a basic IP rate limit, and never returns the API key.
+- Vercel security headers include HSTS, CSP, frame protection, MIME sniffing protection, Referrer-Policy and Permissions-Policy.
 
 Built by [ARK II](https://ark-ii.studio).
