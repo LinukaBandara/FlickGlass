@@ -1,6 +1,9 @@
+import { useEffect } from "react";
+
 const sections = {
   privacy: {
     title: "Privacy Policy",
+    description: "Learn how FlickGlass handles local storage, analytics consent, movie data and third-party services.",
     intro: "This Privacy Policy explains how FlickGlass handles information when you use this cinematic trailer discovery site.",
     items: [
       ["Information we store", "Your watchlist and cookie-consent choice are stored locally in your browser. FlickGlass does not require an account and does not intentionally collect passwords or payment information."],
@@ -13,6 +16,7 @@ const sections = {
   },
   terms: {
     title: "Terms & Conditions",
+    description: "Read the terms for using FlickGlass, its movie discovery interface and third-party trailer content.",
     intro: "By using FlickGlass, you agree to these basic terms for this independent movie discovery and trailer interface.",
     items: [
       ["Use of the site", "FlickGlass is provided for personal, lawful movie discovery and trailer browsing. Do not abuse, overload, scrape, or attempt to bypass security controls on the service."],
@@ -27,6 +31,19 @@ const sections = {
 
 export default function LegalPage({ type }) {
   const content = sections[type] || sections.privacy;
+
+  useEffect(() => {
+    document.title = `${content.title} — FlickGlass`;
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "description";
+      document.head.appendChild(meta);
+    }
+    meta.content = content.description;
+    return () => { document.title = "FlickGlass — Cinematic Trailer Hub"; };
+  }, [content]);
+
   return (
     <main className="min-h-dvh bg-[#0B0C10] px-5 py-24 text-white sm:px-8">
       <article className="mx-auto max-w-3xl">
@@ -35,10 +52,7 @@ export default function LegalPage({ type }) {
         <p className="mt-5 text-base leading-8 text-white/75">{content.intro}</p>
         <div className="mt-10 space-y-7">
           {content.items.map(([heading, body]) => (
-            <section key={heading}>
-              <h2 className="text-lg font-bold text-white">{heading}</h2>
-              <p className="mt-2 leading-7 text-white/70">{body}</p>
-            </section>
+            <section key={heading}><h2 className="text-lg font-bold text-white">{heading}</h2><p className="mt-2 leading-7 text-white/70">{body}</p></section>
           ))}
         </div>
         <p className="mt-12 border-t border-white/10 pt-6 text-xs text-white/55">Last updated: September 11, 2026</p>
