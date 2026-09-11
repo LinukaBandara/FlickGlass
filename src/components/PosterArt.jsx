@@ -27,53 +27,28 @@ export default function PosterArt({ movie, className = "", showMeta = false }) {
     return (
       <img
         src={url}
-        alt={movie.title || ""}
+        alt={`${movie?.title || "Movie"} poster`}
         className={className + " object-cover"}
         loading="lazy"
+        decoding="async"
+        width="500"
+        height="750"
         onError={() => setFailed(true)}
       />
     );
   }
 
   return (
-    <div
-      className={
-        className +
-        " relative flex flex-col items-center justify-center p-4 text-center overflow-hidden"
-      }
-      style={{
-        background: `linear-gradient(160deg, ${c0} 0%, ${c1} 55%, ${c0} 100%)`,
-      }}
-    >
-      <div
-        className="absolute inset-0 opacity-30"
-        style={{
-          background: `radial-gradient(circle at 30% 20%, ${accent}44, transparent 55%)`,
-        }}
-      />
+    <div className={className + " relative flex flex-col items-center justify-center p-4 text-center overflow-hidden"} role="img" aria-label={`${movie?.title || "Movie"} poster placeholder`} style={{ background: `linear-gradient(160deg, ${c0} 0%, ${c1} 55%, ${c0} 100%)` }}>
+      <div className="absolute inset-0 opacity-30" style={{ background: `radial-gradient(circle at 30% 20%, ${accent}44, transparent 55%)` }} />
       <div className="relative z-10 space-y-2 max-w-full">
-        <div
-          className="mx-auto h-10 w-10 rounded-full border flex items-center justify-center"
-          style={{ borderColor: accent + "66", color: accent }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8 5v14l11-7z" />
-          </svg>
+        <div className="mx-auto h-10 w-10 rounded-full border flex items-center justify-center" style={{ borderColor: accent + "66", color: accent }} aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
         </div>
-        <p className="font-bold text-sm sm:text-base leading-snug text-white px-1">
-          {movie?.title || "Untitled"}
-        </p>
-        {showMeta ? (
-          <p className="text-[11px] text-white/55">
-            {movie?.year}
-            {(movie?.genres || [])[0] ? ` · ${movie.genres[0]}` : ""}
-          </p>
-        ) : null}
+        <p className="font-bold text-sm sm:text-base leading-snug text-white px-1">{movie?.title || "Untitled"}</p>
+        {showMeta ? <p className="text-[11px] text-white/70">{movie?.year}{(movie?.genres || [])[0] ? ` · ${movie.genres[0]}` : ""}</p> : null}
       </div>
-      <div
-        className="absolute bottom-0 inset-x-0 h-1"
-        style={{ background: accent, opacity: 0.7 }}
-      />
+      <div className="absolute bottom-0 inset-x-0 h-1" style={{ background: accent, opacity: 0.7 }} />
     </div>
   );
 }
