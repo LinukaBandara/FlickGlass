@@ -10,10 +10,6 @@ async function tmdb(path, params = {}) {
   return res.json();
 }
 
-export function hasTmdbKey() {
-  return true;
-}
-
 let genreMapCache = null;
 
 async function genreMap() {
@@ -21,9 +17,7 @@ async function genreMap() {
   try {
     const data = await tmdb("/genre/movie/list", { language: "en-US" });
     const map = {};
-    (data.genres || []).forEach((g) => {
-      map[g.id] = g.name;
-    });
+    (data.genres || []).forEach((g) => { map[g.id] = g.name; });
     genreMapCache = map;
     return map;
   } catch {
@@ -40,9 +34,7 @@ function genresFromIds(ids, map) {
 async function trailerFor(movieId) {
   try {
     const data = await tmdb(`/movie/${movieId}/videos`);
-    const list = (data.results || []).filter(
-      (v) => v.site === "YouTube" && v.key
-    );
+    const list = (data.results || []).filter((v) => v.site === "YouTube" && v.key);
     const score = (v) => {
       let s = 0;
       const name = (v.name || "").toLowerCase();
@@ -64,12 +56,11 @@ async function trailerFor(movieId) {
 
 function mapMovie(m, trailerId, gMap) {
   const year = (m.release_date || "").slice(0, 4) || "—";
-  const genres = genresFromIds(m.genre_ids, gMap);
   return {
     id: m.id,
     title: m.title,
     year: Number(year) || year,
-    genres,
+    genres: genresFromIds(m.genre_ids, gMap),
     rating: m.vote_average ? Number(m.vote_average.toFixed(1)) : "—",
     poster: m.poster_path ? `${IMG}${m.poster_path}` : "",
     trailerId: trailerId || "",
@@ -82,9 +73,7 @@ export async function fetchNowPlaying(limit = 8) {
   const gMap = await genreMap();
   const data = await tmdb("/movie/now_playing", { language: "en-US", page: "1" });
   const results = (data.results || []).slice(0, limit);
-  const mapped = await Promise.all(
-    results.map(async (m) => mapMovie(m, await trailerFor(m.id), gMap))
-  );
+  const mapped = await Promise.all(results.map(async (m) => mapMovie(m, await trailerFor(m.id), gMap)));
   return mapped.filter((m) => m.poster);
 }
 
@@ -92,19 +81,17 @@ export async function fetchPopular(limit = 6) {
   const gMap = await genreMap();
   const data = await tmdb("/movie/popular", { language: "en-US", page: "1" });
   const results = (data.results || []).slice(0, limit);
-  return results
-    .filter((m) => m.poster_path)
-    .map((m) => {
-      const year = (m.release_date || "").slice(0, 4) || "—";
-      return {
-        id: m.id,
-        title: m.title,
-        year: Number(year) || year,
-        genres: genresFromIds(m.genre_ids, gMap),
-        rating: m.vote_average ? Number(m.vote_average.toFixed(1)) : "—",
-        poster: `${IMG}${m.poster_path}`,
-        trailerId: "",
-        soundtrack: `${m.title} — Original Score`,
-      };
-    });
+  return results.filter((m) => m.poster_path).map((m) => {
+    const year = (m.release_date || "").slice(0, 4) || "—";
+    return {
+      id: m.id,
+      title: m.title,
+      year: Number(year) || year,
+      genres: genresFromIds(m.genre_ids, gMap),
+      rating: m.vote_average ? Number(m.vote_average.toFixed(1)) : "—",
+      poster: `${IMG}${m.poster_path}`,
+      trailerId: "",
+      soundtrack: `${m.title} — Original Score`,
+    };
+  });
 }
