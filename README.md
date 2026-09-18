@@ -1,43 +1,27 @@
 # FlickGlass
 
-Cinematic trailer hub — glassmorphism + TMDB live slate.
+FlickGlass is a cinematic movie and trailer discovery experience with a glassmorphism interface and live TMDB-powered data.
 
 ## Features
+- Cinematic coverflow browsing
+- TMDB movie search and genre filtering
+- YouTube trailer playback
+- Persistent watchlist
+- Deep-linked movie views
+- Server-side TMDB API proxy
+- Privacy, terms, cookie consent, SEO and social metadata
+- Responsive navigation, skeleton states, reduced-motion support, and keyboard focus handling
 
-- 3D coverflow with live drag + autoplay
-- Trailer modal (YouTube)
-- Search + genre filter
-- Server-side TMDB proxy (API key never shipped to the browser)
-- Persistent watchlist (`localStorage`)
-- Deep links `?movie=<id>`
-- Privacy policy + terms
-- Cookie consent with opt-in analytics
-- SEO metadata, social preview, sitemap and robots.txt
-- Mobile navigation, skeleton loaders, reduced-motion support and keyboard focus rings
+## Stack
+- React / Vite
+- JavaScript
+- Vercel server functions
+- TMDB API
 
-## Run
-
-```bash
+## Local development
 npm install
 npm run dev
-```
 
-### TMDB configuration
+Set TMDB_API_KEY in a local environment file using the project example. The key must remain server-side and must never be committed.
 
-Create a local `.env` from `.env.example`:
-
-```bash
-TMDB_API_KEY=your_key
-```
-
-Do **not** use `VITE_TMDB_API_KEY`. Vite exposes `VITE_*` variables to browser code. The TMDB key is consumed only by the Vercel server function at `/api/tmdb`.
-
-For Vercel, add `TMDB_API_KEY` as a server-side Environment Variable and redeploy.
-
-## Security notes
-
-- `.env` files are ignored and the previously committed `.env` was removed from the working branch.
-- The TMDB proxy allowlists endpoints, validates same-origin requests, applies a basic IP rate limit, and never returns the API key.
-- Vercel security headers include HSTS, CSP, frame protection, MIME sniffing protection, Referrer-Policy and Permissions-Policy.
-
-Built by [ARK II](https://ark-ii.studio).
+Built as an ARK II portfolio project.
